@@ -9,9 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "start": "node server.mjs",
-    "deploy": "git pull && docker compose up -d --build && docker image prune -f"
+    "test:watch": "vitest"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^4.0.0",
