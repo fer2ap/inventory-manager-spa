@@ -1,0 +1,47 @@
+{
+    email {env.CADDY_EMAIL}
+}
+
+# Redirect www to apex
+www.yourdomain.com.br {
+    redir https://yourdomain.com.br{uri} permanent
+}
+
+yourdomain.com.br {
+    encode zstd gzip
+
+    reverse_proxy app:3000 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    header {
+        Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "no-referrer"
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+        Cross-Origin-Opener-Policy "same-origin"
+        -Server
+    }
+
+    @assets path /assets/*
+    header @assets Cache-Control "public, max-age=31536000, immutable"
+    header Cache-Control "no-cache"
+
+    @maps path *.map
+    respond @maps 404
+
+    log {
+        output stdout
+        format console
+    }
+}
+
+:80 {
+    bind 0.0.0.0
+    @unknown not host yourdomain.com.br www.yourdomain.com.br
+    respond @unknown 444
+}
